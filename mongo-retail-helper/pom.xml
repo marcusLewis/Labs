@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>br.com.penseimoveis.util</groupId>
-	<artifactId>xml-processor</artifactId>
+	<artifactId>mongo-retail-helper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 

@@ -15,55 +15,13 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 public class Comparador {
-	
-	public static void main1(String[] args) throws Exception {
-		
-		DB db = getMongoDB();
-		DBCollection table = db.getCollection("anuncioMinhaAreaCompletoDocument");
-		
-		BasicDBObject query = new BasicDBObject();
-		query.put("codigoAnuncio", 7364800L);
 
-		BasicDBObject newDocument = new BasicDBObject();
-		newDocument.put("statusAnuncioRetail", "I");
-	 
-		BasicDBObject updateObj = new BasicDBObject();
-		updateObj.put("$set", newDocument);
-	 
-		table.update(query, updateObj);
-	}
-	
-	
-	private static void despublicarAnuncio(DB db, long anuncioId) {
-		BasicDBObject query = new BasicDBObject();
-		query.put("codigoAnuncio", anuncioId);
-
-		BasicDBObject newDocument = new BasicDBObject();
-		newDocument.put("statusAnuncioRetail", "I");
-	 
-		BasicDBObject updateObj = new BasicDBObject();
-		updateObj.put("$set", newDocument);
-	 
-		DBCollection table = db.getCollection("anuncioMinhaAreaCompletoDocument");
-		table.update(query, updateObj);
-		
-		System.out.println(">>> Despublica [" + anuncioId +"]");
-	}
-	
-	private static DB getMongoDB() throws Exception { 
-		MongoClient mongo = new MongoClient( "54.207.82.169" , 27017 );
-		DB db = mongo.getDB("pense-imoveis");
-		db.authenticate("app", "pense@2013".toCharArray());
-		return db;
-	}
-	
 	public static Map<Long, Map<String, Long>> getAnunciosPublicados(DB db, Long idCliente) throws Exception {
 		Map<Long, Map<String, Long>> mapAnunciosDoContrato = new HashMap<Long, Map<String,Long>>();
 		DBCollection table = db.getCollection("anuncioMinhaAreaCompletoDocument");
-		 
+
 		BasicDBObject searchQuery = new BasicDBObject();
 		searchQuery.put("idCliente", idCliente);
 		searchQuery.put("statusAnuncioRetail", "A");
@@ -110,7 +68,7 @@ public class Comparador {
 	public static void main(String[] args) throws Exception {
 		Set<Long> contratosParaExcluir = new HashSet<Long>();
 		boolean ehParaDespublicar = false;
-		DB db = getMongoDB();
+		DB db = MongodbConn.getMongoDB();
 		
 		System.out.println("Buscando anuncios do mongo....");
 		long t1 = System.currentTimeMillis();
@@ -156,6 +114,7 @@ public class Comparador {
 		
 		
 		// mostra o resultado ---------------------------------------------------------------------------------------------------------------
+		DBCollection table = db.getCollection("anuncioMinhaAreaCompletoDocument");
 		FileWriter out = new FileWriter("anuncios-para-despulicar.txt");
 		BufferedWriter writer = new BufferedWriter(out);
 		
@@ -170,7 +129,7 @@ public class Comparador {
 					String k = keys.next();
 					writer.append("  contrato [" + contratoId + "] codigo revenda [" + k + "] codigo no pense [" + anunciosDoContrato.get(k) + "]\n");
 					if (ehParaDespublicar) {
-						despublicarAnuncio(db, anunciosDoContrato.get(k));
+						MongodbConn.despublicarAnuncio(table, anunciosDoContrato.get(k));
 					}
 				}
 			}
