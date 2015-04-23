@@ -10,7 +10,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -53,7 +55,7 @@ public class MainFrame extends JFrame implements ActionListener {
         super("Pense Agile Timetracking counter for Jira Cloud");
         
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setBounds(new Rectangle(450, 600));
+        this.setBounds(new Rectangle(500, 650));
         
         JPanel pnlContents = new JPanel(new BorderLayout(5, 5));
         pnlContents.add(createFieldsPanel(), BorderLayout.NORTH);
@@ -181,38 +183,46 @@ public class MainFrame extends JFrame implements ActionListener {
                         addLog(txtResult, "");
                         progressbar.setValue(progressbar.getMaximum());
                         
-                        long estimated = 0L;
-                        long spent = 0L;
-                        long remaining = 0L;
-                        long burnup = 0L;
                         
-                        for (IssueTimeTracking t: allIssues) {
-                            estimated += t.getOriginalEstimated();
-                            remaining += t.getRemainingEstimated();
-                            spent += t.getTimeSpent();
-                            
-                            if (t.getOriginalEstimated() == 0L && t.getTimeSpent() > 0L) {
-                                burnup += t.getTimeSpent();
+                        
+                        // categoriza as issues por labels
+                        Map<String, List<IssueTimeTracking>> mapLabels = new HashMap<String, List<IssueTimeTracking>>();
+                        
+                        for (IssueTimeTracking i: allIssues) {
+                            if (i.getLabels() != null && !i.getLabels().isEmpty()) {
+                                for (String l: i.getLabels()) {
+                                    if (l != null && !"".equals(l)) {
+                                        List<IssueTimeTracking> tmp = mapLabels.get(l);
+                                        
+                                        if (tmp == null) {
+                                            tmp = new ArrayList<IssueTimeTracking>();
+                                            mapLabels.put(l, tmp);
+                                        }
+                                        
+                                        tmp.add(i);
+                                    }
+                                }
                             }
                         }
                         
-                        addLog(txtResult, "::: [estimated]\t[" + estimated + "]\t[" + timeConversion((int)estimated) + "]");
-                        addLog(txtResult, "::: [remaining]\t[" + remaining + "]\t[" + timeConversion((int)remaining) + "]");
-                        addLog(txtResult, "::: [burndown]\t[" + (estimated - remaining) + "]\t[" + timeConversion((int)(estimated - remaining)) + "]");
-                        addLog(txtResult, "");
-                        addLog(txtResult, "::: [spent]\t[" + spent + "]\t[" + timeConversion((int)spent) + "]");
-                        addLog(txtResult, "::: [burnup]\t[" + burnup + "]\t[" + timeConversion((int)burnup) + "]");
-                        
+                        if (!mapLabels.isEmpty()) {
+                            
+                            for (String key: mapLabels.keySet()) {
+                                List<IssueTimeTracking> lst = mapLabels.get(key);
+                                addLog(txtResult, "");
+                                addLog(txtResult, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                                addLog(txtResult, "Issues com o Label [" + key + "] as [" + lst.size() + "] issues");
+                                addLog(txtResult, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                                dumpStatistics(lst);
+                            }
+                        }
 
-                        NumberFormat formatter = NumberFormat.getPercentInstance();
-                        formatter.setMinimumFractionDigits(2);
-                        formatter.setMaximumFractionDigits(2);
-                        
                         addLog(txtResult, "");
-                        addLog(txtResult, "");
-                        addLog(txtResult, "A sprint reduziu o burndown em [" + formatter.format((double)(estimated - remaining) / (double)estimated) + "]");
-                        addLog(txtResult, "Do tempo trabalhado [" + formatter.format((double)burnup / (double)spent) + "] foi gasto em tarefas não estimadas");
-                        
+                        addLog(txtResult, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                        addLog(txtResult, "Total de todas as [" + allIssues.size() + "] issues");
+                        addLog(txtResult, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                        dumpStatistics(allIssues);
+                    
                     } catch (Exception ex) {
                         StringWriter str = new StringWriter();
                         PrintWriter p = new PrintWriter(str);
@@ -224,6 +234,41 @@ public class MainFrame extends JFrame implements ActionListener {
             });
             t.start();
         }
+    }
+    
+    
+    private void dumpStatistics(List<IssueTimeTracking> issues) {
+        long estimated = 0L;
+        long spent = 0L;
+        long remaining = 0L;
+        long burnup = 0L;
+        
+        for (IssueTimeTracking t: issues) {
+            estimated += t.getOriginalEstimated();
+            remaining += t.getRemainingEstimated();
+            spent += t.getTimeSpent();
+            
+            if (t.getOriginalEstimated() == 0L && t.getTimeSpent() > 0L) {
+                burnup += t.getTimeSpent();
+            }
+        }
+        
+        addLog(txtResult, "::: [estimated]\t[" + estimated + "]\t[" + timeConversion((int)estimated) + "]");
+        addLog(txtResult, "::: [remaining]\t[" + remaining + "]\t[" + timeConversion((int)remaining) + "]");
+        addLog(txtResult, "::: [burndown]\t[" + (estimated - remaining) + "]\t[" + timeConversion((int)(estimated - remaining)) + "]");
+        addLog(txtResult, "");
+        addLog(txtResult, "::: [spent]\t[" + spent + "]\t[" + timeConversion((int)spent) + "]");
+        addLog(txtResult, "::: [burnup]\t[" + burnup + "]\t[" + timeConversion((int)burnup) + "]");
+        
+
+        NumberFormat formatter = NumberFormat.getPercentInstance();
+        formatter.setMinimumFractionDigits(2);
+        formatter.setMaximumFractionDigits(2);
+        
+        addLog(txtResult, "");
+        addLog(txtResult, "");
+        addLog(txtResult, "A sprint reduziu o burndown em [" + formatter.format((double)(estimated - remaining) / (double)estimated) + "]");
+        addLog(txtResult, "Do tempo trabalhado [" + formatter.format((double)burnup / (double)spent) + "] foi gasto em tarefas não estimadas");
     }
     
     private static void addLog(JTextArea txt, String tmp) {
