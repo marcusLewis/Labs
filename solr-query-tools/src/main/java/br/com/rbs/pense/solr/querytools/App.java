@@ -53,7 +53,7 @@ public class App implements ActionListener {
 
     // private static final String SOLR_URL =
     // "http://10.240.64.104:8080/solr/pense-imoveis-venda/select";
-    //private static final String                 SOLR_URL         = "http://10.240.64.105:8080/solr/pense-imoveis-venda_shard1_replica1/select";
+    private static final String                 SOLR_URL         = "http://10.240.64.105:8080/solr/pense-imoveis-venda_shard1_replica1/select";
     
     
     //private static final String                 SOLR_URL         = "http://localhost:18080/solr/pense-imoveis-venda/select";
@@ -72,14 +72,14 @@ public class App implements ActionListener {
     //private static final String                 SOLR_URL         = "http://10.243.0.94:8080/solr/pense-imoveis-aluguel_shard1_replica2/select";
     //private static final String                 ANUNCIO_URL      = "http://veloster:28080/homo/pense-imoveis/anuncio/aluguel/";
 
-    private static final String                 SOLR_URL         = "http://10.243.0.94:8080/solr/pense-imoveis-aluguel_shard1_replica2/select";
-    private static final String                 ANUNCIO_URL      = "http://veloster:28080/homo/pense-imoveis/anuncio/aluguel/";
+    //private static final String                 SOLR_URL         = "http://10.243.0.94:8080/solr/pense-imoveis-aluguel_shard1_replica2/select";
+    //private static final String                 ANUNCIO_URL      = "http://veloster:28080/homo/pense-imoveis/anuncio/aluguel/";
 
     
     
     
     // prod
-    //private static final String                 ANUNCIO_URL      =  "http://veloster:28080/pense-imoveis/anuncio/venda/";
+    private static final String                 ANUNCIO_URL      =  "http://veloster:28080/pense-imoveis/anuncio/venda/";
     //private static final String                 ANUNCIO_URL      =  "http://veloster:28080/pense-imoveis/anuncio/aluguel/";
     //private static final String                 SOLR_URL         = "http://10.240.64.105:8080/solr/pense-imoveis-aluguel_shard1_replica3/select";
 
@@ -373,12 +373,16 @@ public class App implements ActionListener {
                     
                     if (obj.containsKey("nomeFantasia")) {
                         String tmp = obj.get("nomeFantasia").toString().toUpperCase();
-                        if (tmp.startsWith("V PRIME")) {
+                        /*if (tmp.startsWith("V PRIME")) {
                             sb.append("    ******** V PRIME - TESTE ***********");
                         }
                         
                         if (tmp.startsWith("RECANTO")) {
                             sb.append("    ******** RECANTO - TESTE ***********");
+                        }*/
+                        
+                        if (tmp.startsWith("PRIVATE")) {
+                            sb.append("    ******** PRIVATE - TESTE ***********");
                         }
                     }
                     
