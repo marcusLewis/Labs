@@ -20,7 +20,7 @@ public class Comparador {
 
     public static void main(String[] args) throws Exception {
         Set<Long> contratosParaExcluir = new HashSet<Long>();
-        boolean ehParaDespublicar = true;
+        boolean ehParaDespublicar = false;
         DB db = MongodbConn.getMongoDB();
         
         System.out.println("Buscando anuncios do mongo....");
